@@ -1,0 +1,20 @@
+          Revision history for POSIX-RT-Signal
+
+0.005     2011-10-09 00:12:13 Europe/Amsterdam
+          Renamed module from Signal::More to POSIX::RT::Signal
+
+0.004     2011-09-15 01:22:19 Europe/Amsterdam
+          Handle 5.15.3's new POSIX::SigSet representation
+
+0.003     2011-06-30 15:04:32 Europe/Amsterdam
+          Make strerror_r happy on Linux
+          Make sure locales don't interfere with tests by calling setlocale
+          Try to make FreeBSD pass the illegal argument test, because it's stupid enough not to puke on signo -1
+
+0.002     2011-06-20 22:29:01 Europe/Amsterdam
+          Make sigwait return hashref instead of list
+
+0.001     2011-02-11 19:26:02 Europe/Amsterdam
+          First version, released on an unsuspecting world.
+
+   
