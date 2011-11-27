@@ -1,6 +1,6 @@
 package POSIX::RT::Signal;
 {
-  $POSIX::RT::Signal::VERSION = '0.005';
+  $POSIX::RT::Signal::VERSION = '0.006';
 }
 
 use strict;
@@ -19,11 +19,11 @@ XSLoader::load(__PACKAGE__, __PACKAGE__->VERSION);
 
 =head1 NAME
 
-POSIX::RT::Signal - POSIX Real-time signal handling functions
+POSIX::RT::Signal
 
 =head1 VERSION
 
-version 0.005
+version 0.006
 
 =head1 SYNOPSIS
 

@@ -3,8 +3,8 @@
    "author" : [
       "Leon Timmermans <fawaka@gmail.com>"
    ],
-   "dynamic_config" : 0,
-   "generated_by" : "Dist::Zilla version 4.300000, CPAN::Meta::Converter version 2.110440",
+   "dynamic_config" : "1",
+   "generated_by" : "Dist::Zilla version 4.300003, CPAN::Meta::Converter version 2.112150",
    "license" : [
       "perl_5"
    ],
@@ -56,6 +56,6 @@
          "web" : "http://github.com/Leont/posix-rt-signal"
       }
    },
-   "version" : "0.005"
+   "version" : "0.006"
 }
 

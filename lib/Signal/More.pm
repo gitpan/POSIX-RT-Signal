@@ -1,6 +1,6 @@
 package Signal::More;
 {
-  $Signal::More::VERSION = '0.005';
+  $Signal::More::VERSION = '0.006';
 }
 
 use strict;
@@ -17,11 +17,11 @@ use Sub::Exporter -setup => { exports => [qw/sigwait sigqueue/] };
 
 =head1 NAME
 
-Signal::More - Various signal handling functions, legacy name
+Signal::More
 
 =head1 VERSION
 
-version 0.005
+version 0.006
 
 =head1 DESCRIPTION
 
