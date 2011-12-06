@@ -1,6 +1,9 @@
 use strict;
 use warnings;
+use Devel::CheckLib;
 use Module::Build;
+
+my @extra_linker_flags = map { "-l$_" } grep { check_lib(lib => $_) } qw/rt/;
 
 my $builder = Module::Build->new(
   module_name         => 'POSIX::RT::Signal',
@@ -8,22 +11,24 @@ my $builder = Module::Build->new(
     'File::Find' => '0',
     'File::Temp' => '0',
     'Module::Build' => '0.3601',
-    'POSIX' => '0',
     'Test::Exception' => '0',
-    'Test::More' => '0',
+    'Test::More' => '0.88',
     'Time::HiRes' => '0'
   },
   'configure_requires' => {
     'Module::Build' => '0.3601'
   },
   'requires' => {
+    'Carp' => '0',
+    'Devel::CheckLib' => '0',
+    'POSIX' => '0',
     'Sub::Exporter' => '0',
     'XSLoader' => '0',
     'perl' => '5.006',
     'strict' => '0',
     'warnings' => '0'
   },
-  extra_linker_flags  => [ '-lrt' ],
+  extra_linker_flags  => \@extra_linker_flags,
 );
 
 $builder->create_build_script();

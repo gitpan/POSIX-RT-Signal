@@ -1,17 +1,37 @@
 package POSIX::RT::Signal;
 {
-  $POSIX::RT::Signal::VERSION = '0.006';
+  $POSIX::RT::Signal::VERSION = '0.007';
 }
 
 use strict;
 use warnings FATAL => 'all';
 
+use Carp qw/croak/;
+use POSIX qw//;
 use XSLoader;
-use Sub::Exporter -setup => { exports => [qw/sigwait sigqueue/] };
+use Sub::Exporter -setup => { exports => [qw/sigwait sigqueue allocate_signal deallocate_signal/] };
 
 XSLoader::load(__PACKAGE__, __PACKAGE__->VERSION);
 
+my @signals = (defined &POSIX::SIGRT_MIN) ?  (POSIX::SIGRT_MIN() .. POSIX::SIGRT_MAX()) : (POSIX::SIGUSR1(), POSIX::SIGUSR2());
+
+my %allowed = map { ( $_ => 1 ) } @signals;
+
+sub allocate_signal {
+	my ($priority) = @_;
+	return +($priority ? shift @signals : pop @signals) || croak 'no more signal numbers available';
+}
+
+sub deallocate_signal {
+	my ($signal) = @_;
+	croak 'Signal not from original set' if not $allowed{$signal};
+	@signals = sort @signals, $signal;
+	return;
+}
+
 1;
+
+#ABSTRACT: POSIX Real-time signal handling functions
 
 
 
@@ -19,11 +39,11 @@ XSLoader::load(__PACKAGE__, __PACKAGE__->VERSION);
 
 =head1 NAME
 
-POSIX::RT::Signal
+POSIX::RT::Signal - POSIX Real-time signal handling functions
 
 =head1 VERSION
 
-version 0.006
+version 0.007
 
 =head1 SYNOPSIS
 
@@ -86,13 +106,27 @@ Signal value as passed to sigqueue
 
 Note that not all of these will have meaningful values for all or even most signals
 
+=head2 allocate_signal($priority)
+
+Pick a signal from the set of signals available to the user. The signal will not be given to any other caller of this function until it has been deallocated. If supported, these will be real-time signals. By default it will choose the lowest priority signal available, but if C<$priority> is true it will pick the highest priority one. If real-time signals are not supported this will return C<SIGUSR1> and C<SIGUSR2>
+
+=head2 deallocate_signal($signal)
+
+Deallocate the signal to be reused for C<allocate_signal>.
+
 =head1 SEE ALSO
 
 =over 4
 
-=item * L<Signal::Mask>
+=item * L<Signal::Mask|Signal::Mask>
 
-=item * L<POSIX>
+=item * L<IPC::Signal|IPC::Signal>
+
+=item * L<POSIX::RT::Timer|POSIX::RT::Timer>
+
+=item * L<POSIX|POSIX>
+
+=item * L<Linux::FD::Signal|Linux::FD::Signal>
 
 =back
 
@@ -111,6 +145,4 @@ the same terms as the Perl 5 programming language system itself.
 
 
 __END__
-
-#ABSTRACT: POSIX Real-time signal handling functions
 

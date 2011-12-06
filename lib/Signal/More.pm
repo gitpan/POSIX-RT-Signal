@@ -1,6 +1,6 @@
 package Signal::More;
 {
-  $Signal::More::VERSION = '0.006';
+  $Signal::More::VERSION = '0.007';
 }
 
 use strict;
@@ -11,21 +11,23 @@ use Sub::Exporter -setup => { exports => [qw/sigwait sigqueue/] };
 
 1;
 
+#ABSTRACT: Various signal handling functions, legacy name
+
 
 
 =pod
 
 =head1 NAME
 
-Signal::More
+Signal::More - Various signal handling functions, legacy name
 
 =head1 VERSION
 
-version 0.006
+version 0.007
 
 =head1 DESCRIPTION
 
-This is the old name of L<POSIX::RT::Signal>. This is only available for legacy purposes and will be removed at some point in the future. For a description of the functions it exports, see POSIX::RT::Signal.
+This is the old name of L<POSIX::RT::Signal|POSIX::RT::Signal>. This is only available for legacy purposes and will be removed at some point in the future. For a description of the functions it exports, see POSIX::RT::Signal.
 
 =head1 AUTHOR
 
@@ -42,7 +44,5 @@ the same terms as the Perl 5 programming language system itself.
 
 
 __END__
-
-#ABSTRACT: Various signal handling functions, legacy name
 
 

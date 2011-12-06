@@ -10,6 +10,7 @@ SIGNATURE
 dist.ini
 lib/POSIX/RT/Signal.pm
 lib/POSIX/RT/Signal.xs
+lib/POSIX/RT/ppport.h
 lib/Signal/More.pm
 t/00-compile.t
 t/10-basics.t
