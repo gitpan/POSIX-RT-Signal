@@ -16,11 +16,11 @@ my $builder = Module::Build->new(
     'Time::HiRes' => '0'
   },
   'configure_requires' => {
+    'Devel::CheckLib' => '0',
     'Module::Build' => '0.3601'
   },
   'requires' => {
     'Carp' => '0',
-    'Devel::CheckLib' => '0',
     'POSIX' => '0',
     'Sub::Exporter' => '0',
     'XSLoader' => '0',
