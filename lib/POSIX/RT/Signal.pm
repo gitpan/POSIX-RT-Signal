@@ -1,6 +1,6 @@
 package POSIX::RT::Signal;
 {
-  $POSIX::RT::Signal::VERSION = '0.008';
+  $POSIX::RT::Signal::VERSION = '0.009';
 }
 
 use strict;
@@ -9,9 +9,11 @@ use warnings FATAL => 'all';
 use Carp qw/croak/;
 use POSIX qw//;
 use XSLoader;
-use Sub::Exporter -setup => { exports => [qw/sigwait sigqueue allocate_signal deallocate_signal/] };
+use Sub::Exporter -setup => { exports => [qw/sigwaitinfo sigwait sigqueue allocate_signal deallocate_signal/] };
 
 XSLoader::load(__PACKAGE__, __PACKAGE__->VERSION);
+
+*sigwait = \&sigwaitinfo;
 
 my @signals = (defined &POSIX::SIGRT_MIN) ?  (POSIX::SIGRT_MIN() .. POSIX::SIGRT_MAX()) : (POSIX::SIGUSR1(), POSIX::SIGUSR2());
 
@@ -43,16 +45,16 @@ POSIX::RT::Signal - POSIX Real-time signal handling functions
 
 =head1 VERSION
 
-version 0.008
+version 0.009
 
 =head1 SYNOPSIS
 
- use POSIX::RT::Signal qw/sigqueue sigwait/;
+ use POSIX::RT::Signal qw/sigqueue sigwaitinfo/;
  use Signal::Mask;
  
  $Signal::Mask{USR1}++;
  sigqueue($$, 'USR1');
- sigwait('USR1');
+ my $info = sigwaitinfo('USR1');
 
 =head1 FUNCTIONS
 
@@ -60,7 +62,7 @@ version 0.008
 
 Queue a signal $sig to process $pid, optionally with the additional argument $value. On error an exception is thrown. $sig must be either a signal number(C<14>) or a signal name (C<'ALRM'>).
 
-=head2 sigwait($signals, $timeout = undef)
+=head2 sigwaitinfo($signals, $timeout = undef)
 
 Wait for a signal in $signals to arrive and return it. The signal handler (if any) will not be called. Unlike signal handlers it is not affected by signal masks, in fact you are expected to mask signals you're waiting for. C<$signals> must either be a POSIX::SigSet object, a signal number or a signal name. If C<$timeout> is specified, it indicates the maximal time the thread is suspended in fractional seconds; if no signal is received it returns an empty list, or in void context an exception. If $timeout is not defined it may wait indefinitely until a signal arrives. On success it returns a hash with the following entries:
 
@@ -100,11 +102,17 @@ Band event for SIGPOLL
 
 =item * value
 
-Signal value as passed to sigqueue
+Signal integer value as passed to sigqueue
+
+=item * ptr
+
+The pointer integer as passed to sigqueue
 
 =back
 
 Note that not all of these will have meaningful values for all or even most signals
+
+C<sigwait> is a deprecated alias for C<sigwaitinfo>.
 
 =head2 allocate_signal($priority)
 
@@ -130,6 +138,9 @@ Deallocate the signal to be reused for C<allocate_signal>.
 
 =back
 
+=for Pod::Coverage sigwait
+=end
+
 =head1 AUTHOR
 
 Leon Timmermans <fawaka@gmail.com>
@@ -145,4 +156,5 @@ the same terms as the Perl 5 programming language system itself.
 
 
 __END__
+
 
