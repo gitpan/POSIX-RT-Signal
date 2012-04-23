@@ -1,10 +1,3 @@
-#if defined linux
-#	ifndef _GNU_SOURCE
-#		define _GNU_SOURCE
-#	endif
-#	define GNU_STRERROR_R
-#endif
-
 #include <signal.h>
 
 #define PERL_NO_GET_CONTEXT
@@ -13,24 +6,28 @@
 #include "XSUB.h"
 #include "ppport.h"
 
-static void get_sys_error(char* buffer, size_t buffer_size) {
-#ifdef _GNU_SOURCE
+static void get_sys_error(char* buffer, size_t buffer_size, int errnum) {
+#if HAVE_STRERROR_R
+#	if STRERROR_R_PROTO == REENTRANT_PROTO_B_IBW
 	const char* message = strerror_r(errno, buffer, buffer_size);
-	if (message != buffer) {
-		memcpy(buffer, message, buffer_size -1);
-		buffer[buffer_size] = '\0';
-	}
-#else
+	if (message != buffer)
+		memcpy(buffer, message, buffer_size);
+#	else
 	strerror_r(errno, buffer, buffer_size);
+#	endif
+#else
+	const char* message = strerror(errno);
+	strncpy(buffer, message, buffer_size - 1);
+	buffer[buffer_size - 1] = '\0';
 #endif
 }
 
-static void S_die_sys(pTHX_ const char* format) {
+static void S_die_sys(pTHX_ const char* format, int errnum) {
 	char buffer[128];
-	get_sys_error(buffer, sizeof buffer);
+	get_sys_error(buffer, sizeof buffer, errnum);
 	Perl_croak(aTHX_ format, buffer);
 }
-#define die_sys(format) S_die_sys(aTHX_ format)
+#define die_sys(format, errnum) S_die_sys(aTHX_ format, errnum)
 
 sigset_t* S_sv_to_sigset(pTHX_ SV* sigmask, const char* name) {
 	if (!SvOK(sigmask))
@@ -75,10 +72,26 @@ static void nv_to_timespec(NV input, struct timespec* output) {
 
 MODULE = POSIX::RT::Signal				PACKAGE = POSIX::RT::Signal
 
+IV
+sigwait(set)
+	SV* set;
+	PREINIT:
+		int val;
+		int info;
+	PPCODE:
+		val = sigwait(get_sigset(set, "set"), &info);
+		if (val > 0)
+			mPUSHi(info);
+		else if (GIMME_V == G_VOID && val != EAGAIN)
+			die_sys("Couldn't sigwaitinfo: %s", val);
+		/* Drop off returning nothing */
+
 SV*
 sigwaitinfo(set, timeout = undef)
 	SV* set;
 	SV* timeout;
+	ALIAS:
+		sigtimedwait = 0
 	PREINIT:
 		int val;
 		siginfo_t info;
@@ -107,7 +120,7 @@ sigwaitinfo(set, timeout = undef)
 			mPUSHs(newRV_noinc((SV*)ret));
 		}
 		else if (GIMME_V == G_VOID && errno != EAGAIN) {
-			die_sys("Couldn't sigwaitinfo: %s");
+			die_sys("Couldn't sigwaitinfo: %s", errno);
 		}
 		/* Drop off returning nothing */
 
@@ -118,11 +131,13 @@ sigqueue(pid, signal, number = 0)
 	int number;
 	PREINIT:
 		int ret, signo;
+		union sigval number_val;
 	CODE:
 		signo = (SvIOK(signal) || looks_like_number(signal)) && SvIV(signal) ? SvIV(signal) : whichsig(SvPV_nolen(signal));
-		ret = sigqueue(pid, signo, (union sigval) number);
+		number_val.sival_int = number;
+		ret = sigqueue(pid, signo, number_val);
 		if (ret == 0)
 			XSRETURN_YES;
 		else
-			die_sys("Couldn't sigqueue: %s");
+			die_sys("Couldn't sigqueue: %s", errno);
 
