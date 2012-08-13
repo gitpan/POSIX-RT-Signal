@@ -1,6 +1,6 @@
 package POSIX::RT::Signal;
 {
-  $POSIX::RT::Signal::VERSION = '0.010';
+  $POSIX::RT::Signal::VERSION = '0.011';
 }
 
 use strict;
@@ -43,7 +43,7 @@ POSIX::RT::Signal - POSIX Real-time signal handling functions
 
 =head1 VERSION
 
-version 0.010
+version 0.011
 
 =head1 SYNOPSIS
 
