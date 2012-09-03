@@ -7,7 +7,7 @@
 #include "ppport.h"
 
 static void get_sys_error(char* buffer, size_t buffer_size, int errnum) {
-#if HAVE_STRERROR_R
+#ifdef HAS_STRERROR_R
 #	if STRERROR_R_PROTO == REENTRANT_PROTO_B_IBW
 	const char* message = strerror_r(errno, buffer, buffer_size);
 	if (message != buffer)
@@ -50,8 +50,9 @@ sigset_t* S_get_sigset(pTHX_ SV* signal, const char* name) {
 	else {
 		int signo = (SvIOK(signal) || looks_like_number(signal)) && SvIV(signal) ? SvIV(signal) : whichsig(SvPV_nolen(signal));
 		SV* buffer = sv_2mortal(newSVpvn("", 0));
+		sigset_t* ret;
 		sv_grow(buffer, sizeof(sigset_t));
-		sigset_t* ret = (sigset_t*)SvPV_nolen(buffer);
+		ret = (sigset_t*)SvPV_nolen(buffer);
 		sigemptyset(ret);
 		sigaddset(ret, signo);
 		return ret;
