@@ -1,5 +1,10 @@
           Revision history for POSIX-RT-Signal
 
+0.013     2014-07-31 17:42:04+02:00 Europe/Amsterdam
+          Use Sub::Exporter::Progressive instead of Sub::Exporter
+          Sort signals correctly after deallocation
+          Share signal allocation list between threads
+
 0.012     2012-09-03 19:20:25 Europe/Amsterdam
           Check HAS_STRERROR_R correctly
           Fix C89 compatibility

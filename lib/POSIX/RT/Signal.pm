@@ -1,19 +1,17 @@
 package POSIX::RT::Signal;
-{
-  $POSIX::RT::Signal::VERSION = '0.012';
-}
-
+$POSIX::RT::Signal::VERSION = '0.013';
 use strict;
 use warnings FATAL => 'all';
 
 use Carp qw/croak/;
 use POSIX qw//;
 use XSLoader;
-use Sub::Exporter -setup => { exports => [qw/sigwaitinfo sigwait sigqueue allocate_signal deallocate_signal/] };
+use Sub::Exporter::Progressive -setup => { exports => [qw/sigwaitinfo sigwait sigqueue allocate_signal deallocate_signal/] };
+use threads::shared;
 
 XSLoader::load(__PACKAGE__, __PACKAGE__->VERSION);
 
-my @signals = (defined &POSIX::SIGRT_MIN) ?  (POSIX::SIGRT_MIN() .. POSIX::SIGRT_MAX()) : (POSIX::SIGUSR1(), POSIX::SIGUSR2());
+my @signals : shared = (defined &POSIX::SIGRT_MIN) ?  (POSIX::SIGRT_MIN() .. POSIX::SIGRT_MAX()) : (POSIX::SIGUSR1(), POSIX::SIGUSR2());
 
 my %allowed = map { ( $_ => 1 ) } @signals;
 
@@ -25,7 +23,7 @@ sub allocate_signal {
 sub deallocate_signal {
 	my ($signal) = @_;
 	croak 'Signal not from original set' if not $allowed{$signal};
-	@signals = sort @signals, $signal;
+	@signals = sort { $a <=> $b } @signals, $signal;
 	return;
 }
 
@@ -33,9 +31,11 @@ sub deallocate_signal {
 
 #ABSTRACT: POSIX Real-time signal handling functions
 
-
+__END__
 
 =pod
+
+=encoding UTF-8
 
 =head1 NAME
 
@@ -43,7 +43,7 @@ POSIX::RT::Signal - POSIX Real-time signal handling functions
 
 =head1 VERSION
 
-version 0.012
+version 0.013
 
 =head1 SYNOPSIS
 
@@ -54,11 +54,15 @@ version 0.012
  sigqueue($$, 'USR1');
  my $info = sigwaitinfo('USR1');
 
+=head1 DESCRIPTION
+
+This module exposes several advanced features and interfaces of POSIX real-time signals.
+
 =head1 FUNCTIONS
 
 =head2 sigqueue($pid, $sig, $value = 0)
 
-Queue a signal $sig to process C<$pid>, optionally with the additional argument C<$value>. On error an exception is thrown. C<$sig> must be either a signal number(C<14>) or a signal name (C<'ALRM'>).
+Queue a signal $sig to process C<$pid>, optionally with the additional argument C<$value>. On error an exception is thrown. C<$sig> must be either a signal number(C<14>) or a signal name (C<'ALRM'>). If the signal queue is full, it returns undef and sets C<$!> to EAGAIN.
 
 =head2 sigwaitinfo($signals, $timeout = undef)
 
@@ -157,8 +161,3 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-
-
-__END__
-
-

@@ -4,6 +4,9 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+
+#define NEED_newRV_noinc
+#define NEED_sv_2pv_flags
 #include "ppport.h"
 
 static void get_sys_error(char* buffer, size_t buffer_size, int errnum) {
@@ -67,8 +70,8 @@ static void nv_to_timespec(NV input, struct timespec* output) {
 	output->tv_nsec = (long) ((input - output->tv_sec) * NANO_SECONDS);
 }
 
-#define add_entry(name, value) hv_stores(ret, name, newSViv(value))
-#define add_simple(name) add_entry(#name, info.si_##name)
+#define add_entry(name, value, type) hv_stores(ret, name, newSV##type(value))
+#define add_simple(name) add_entry(#name, info.si_##name, iv)
 #define undef &PL_sv_undef
 
 MODULE = POSIX::RT::Signal				PACKAGE = POSIX::RT::Signal
@@ -114,9 +117,9 @@ sigwaitinfo(set, timeout = undef)
 			add_simple(uid);
 			add_simple(status);
 			add_simple(band);
-			add_entry("value", info.si_value.sival_int);
-			hv_stores(ret, "ptr", newSVuv(PTR2UV(info.si_value.sival_ptr)));
-			hv_stores(ret, "addr", newSVuv(PTR2UV(info.si_addr)));
+			add_entry("value", info.si_value.sival_int, iv);
+			add_entry("ptr", PTR2UV(info.si_value.sival_ptr), uv);
+			add_entry("addr", PTR2UV(info.si_addr), uv);
 			
 			mPUSHs(newRV_noinc((SV*)ret));
 		}
