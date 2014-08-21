@@ -60,7 +60,7 @@
    "provides" : {
       "POSIX::RT::Signal" : {
          "file" : "lib/POSIX/RT/Signal.pm",
-         "version" : "0.013"
+         "version" : "0.014"
       }
    },
    "release_status" : "stable",
@@ -75,6 +75,6 @@
          "web" : "https://github.com/Leont/posix-rt-signal"
       }
    },
-   "version" : "0.013"
+   "version" : "0.014"
 }
 
