@@ -1,5 +1,5 @@
 package POSIX::RT::Signal;
-$POSIX::RT::Signal::VERSION = '0.014';
+$POSIX::RT::Signal::VERSION = '0.015';
 use strict;
 use warnings FATAL => 'all';
 
@@ -11,7 +11,7 @@ use threads::shared;
 
 XSLoader::load(__PACKAGE__, __PACKAGE__->VERSION);
 
-my @signals : shared = (defined &POSIX::SIGRT_MIN) ?  (POSIX::SIGRT_MIN() .. POSIX::SIGRT_MAX()) : (POSIX::SIGUSR1(), POSIX::SIGUSR2());
+my @signals : shared = (defined &POSIX::SIGRTMIN) ?  (POSIX::SIGRTMIN() .. POSIX::SIGRTMAX()) : (POSIX::SIGUSR1(), POSIX::SIGUSR2());
 
 my %allowed = map { ( $_ => 1 ) } @signals;
 
@@ -43,7 +43,7 @@ POSIX::RT::Signal - POSIX Real-time signal handling functions
 
 =head1 VERSION
 
-version 0.014
+version 0.015
 
 =head1 SYNOPSIS
 
